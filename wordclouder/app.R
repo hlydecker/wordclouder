@@ -49,47 +49,11 @@ ui <- fluidPage(
           checkboxInput("remove_words", "Remove specific words?", FALSE),
           conditionalPanel(
             condition = "input.remove_words == 1",
-            textAreaInput("words_to_remove1", "Words to remove (one per line)", rows = 1)
-          ),
-          conditionalPanel(
-            condition = "input.remove_words == 1 && input.words_to_remove1.length > 0",
-            textAreaInput("words_to_remove2", "", rows = 1)
-          ),
-          conditionalPanel(
-            condition = "input.remove_words == 1 && input.words_to_remove2.length > 0",
-            textAreaInput("words_to_remove3", "", rows = 1)
-          ),
-          conditionalPanel(
-            condition = "input.remove_words == 1 && input.words_to_remove3.length > 0",
-            textAreaInput("words_to_remove4", "", rows = 1)
-          ),
-          conditionalPanel(
-            condition = "input.remove_words == 1 && input.words_to_remove4.length > 0",
-            textAreaInput("words_to_remove5", "", rows = 1)
-          ),
-          conditionalPanel(
-            condition = "input.remove_words == 1 && input.words_to_remove5.length > 0",
-            textAreaInput("words_to_remove6", "", rows = 1)
-          ),
-          conditionalPanel(
-            condition = "input.remove_words == 1 && input.words_to_remove6.length > 0",
-            textAreaInput("words_to_remove7", "", rows = 1)
-          ),
-          conditionalPanel(
-            condition = "input.remove_words == 1 && input.words_to_remove7.length > 0",
-            textAreaInput("words_to_remove8", "", rows = 1)
-          ),
-          conditionalPanel(
-            condition = "input.remove_words == 1 && input.words_to_remove8.length > 0",
-            textAreaInput("words_to_remove9", "", rows = 1)
-          ),
-          conditionalPanel(
-            condition = "input.remove_words == 1 && input.words_to_remove9.length > 0",
-            textAreaInput("words_to_remove10", "", rows = 1)
+            textAreaInput("words_to_remove", "Words to remove (comma-seperated)")
           ),
           hr(),
           numericInput("num", "Maximum number of words",
-                       value = 100, min = 5
+                       value = 25, min = 5
           ),
           hr(),
           # WIP: Select Word cloud colour palette. Default is black
@@ -101,7 +65,8 @@ ui <- fluidPage(
           #   selected = "All Black"
           # ),
           hr(),
-          colourInput("col", "Background color", value = "white"),
+          colourInput("word_col", "Word color", value = "#000000"),
+          colourInput("back_col", "Background color", value = "white"),
           hr(),
           HTML('<p>Report a <a href="https://github.com/hlydecker/wordclouder/issues">bug</a> or view the <a href="https://github.com/hlydecker/wordclouder">source code</a>.</p>')
         ),
@@ -160,7 +125,7 @@ server <- function(input, output) {
     }
   })
 
-  create_wordcloud <- function(data, num_words = 100, background = "white") {
+  create_wordcloud <- function(data, num_words = 25, background = "white", word_color = "#000000") {
 
     # If text is provided, convert it to a dataframe of word frequencies
     if (is.character(data)) {
@@ -169,16 +134,10 @@ server <- function(input, output) {
       corpus <- tm_map(corpus, removePunctuation)
       corpus <- tm_map(corpus, removeNumbers)
       corpus <- tm_map(corpus, removeWords, stopwords(tolower(input$language)))
-      corpus <- tm_map(corpus, removeWords, c(input$words_to_remove1))
-      corpus <- tm_map(corpus, removeWords, c(input$words_to_remove2))
-      corpus <- tm_map(corpus, removeWords, c(input$words_to_remove3))
-      corpus <- tm_map(corpus, removeWords, c(input$words_to_remove4))
-      corpus <- tm_map(corpus, removeWords, c(input$words_to_remove5))
-      corpus <- tm_map(corpus, removeWords, c(input$words_to_remove6))
-      corpus <- tm_map(corpus, removeWords, c(input$words_to_remove7))
-      corpus <- tm_map(corpus, removeWords, c(input$words_to_remove8))
-      corpus <- tm_map(corpus, removeWords, c(input$words_to_remove9))
-      corpus <- tm_map(corpus, removeWords, c(input$words_to_remove10))
+      if (input$remove_words) {
+        custom_stopwords <- unlist(strsplit(input$words_to_remove, ",\\s*"))
+        corpus <- tm_map(corpus, removeWords, custom_stopwords)
+      }
       tdm <- as.matrix(TermDocumentMatrix(corpus))
       data <- sort(rowSums(tdm), decreasing = TRUE)
       data <- data.frame(word = names(data), freq = as.numeric(data))
@@ -200,13 +159,14 @@ server <- function(input, output) {
                minRotation = 0,
                maxRotation = 0,
                rotateRatio = 0,
-               color =  "black"
-               )
+               color = word_color
+    )
   }
   output$cloud <- renderWordcloud2({
     create_wordcloud(data_source(),
                      num_words = input$num,
-                     background = input$col
+                     background = input$back_col,
+                     word_color = input$word_col
     )
   })
 }
