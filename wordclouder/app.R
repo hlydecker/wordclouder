@@ -68,7 +68,7 @@ ui <- fluidPage(
           colourInput("word_col", "Word color", value = "#000000"),
           colourInput("back_col", "Background color", value = "white"),
           hr(),
-          HTML('<p>Report a <a href="https://github.com/hlydecker/wordclouder/issues">bug</a> or view the <a href="https://github.com/hlydecker/wordclouder">source code</a>.</p>')
+          HTML('<p>Request a feature or report a bug on <a href="https://github.com/hlydecker/wordclouder/issues">GitHub</a> or view the <a href="https://github.com/hlydecker/wordclouder">source code</a></p>')
         ),
         mainPanel(
           wordcloud2Output("cloud"),
@@ -92,7 +92,7 @@ ui <- fluidPage(
       br(),
       br(),
       br(),
-      HTML('<p>Report a <a href="https://github.com/hlydecker/wordclouder/issues">bug</a> or view the <a href="https://github.com/hlydecker/wordclouder">source code</a>. Based off code developed by <a href="https://www.antoinesoetewey.com/">www.antoinesoetewey.com</a>.</p>'),
+      HTML('<p>Request a feature or report a bug on <a href="https://github.com/hlydecker/wordclouder/issues">GitHub</a> or view the <a href="https://github.com/hlydecker/wordclouder">source code</a>. Based off code developed by <a href="https://www.antoinesoetewey.com/">www.antoinesoetewey.com</a>.</p>'),
       br(),
       br()
     )
